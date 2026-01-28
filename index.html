@@ -49,20 +49,20 @@ body.dark button { background:#333; color:#fff; }
 
 <!-- MANUEL FİYATLAR -->
 <div style="margin-top:10px;">
-<label>Manuel 22 Ayar Fiyat (opsiyonel, TL): </label>
-<input type="number" step="0.01" id="manuel22" placeholder="Boşsa API fiyatı kullanılır">
+<label>Manuel 22 Ayar Fiyat: </label>
+<input type="number" step="0.01" id="manuel22" placeholder="--">
 </div>
 <div style="margin-top:5px;">
-<label>Manuel 24 Ayar Fiyat (opsiyonel, TL): </label>
-<input type="number" step="0.01" id="manuel24" placeholder="Boşsa API fiyatı kullanılır">
+<label>Manuel 24 Ayar Fiyat: </label>
+<input type="number" step="0.01" id="manuel24" placeholder="--">
 </div>
 <div style="margin-top:5px;">
-<label>Manuel 18 Ayar Fiyat (opsiyonel, TL): </label>
-<input type="number" step="0.01" id="manuel18" placeholder="Boşsa API fiyatı kullanılır">
+<label>Manuel 18 Ayar Fiyat: </label>
+<input type="number" step="0.01" id="manuel18" placeholder="--">
 </div>
 <div style="margin-top:5px;">
-<label>Manuel 14 Ayar Fiyat (opsiyonel, TL): </label>
-<input type="number" step="0.01" id="manuel14" placeholder="Boşsa API fiyatı kullanılır">
+<label>Manuel 14 Ayar Fiyat: </label>
+<input type="number" step="0.01" id="manuel14" placeholder="--">
 </div>
 
 <div style="margin-top:5px;">
@@ -72,9 +72,17 @@ body.dark button { background:#333; color:#fff; }
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 const ALTIN_GRAM = {
-    "24 Ayar Gram Altın":1, "22 Ayar Gram Altın":1, "18 Ayar Gram Altın":1, "14 Ayar Gram Altın":1,
-    "Çeyrek Altın":1.75, "Yarım Altın":3.5, "Tam Altın":7.2, "Cumhuriyet Altını":7.2,
-    "Reşat Altın":7.2, "Ata Altın":7.2, "Beşli Altın":36
+    "24 Ayar Gram Altın":1,
+    "22 Ayar Gram Altın":1,
+    "18 Ayar Gram Altın":1,
+    "14 Ayar Gram Altın":1,
+    "Çeyrek Altın":1.75,
+    "Yarım Altın":3.5,
+    "Tam Altın":7.2,
+    "Cumhuriyet Altını":7.2,
+    "Reşat Altın":7.2,
+    "Ata Altın":7.2,
+    "Beşli Altın":36
 };
 const KATSAYI_22AYAR = 1.0515;
 
@@ -83,9 +91,16 @@ const varliklar = [
     {ad:"22 Ayar Gram Altın", api:"Gram Altın"},
     {ad:"18 Ayar Gram Altın", api:"Gram Altın"},
     {ad:"14 Ayar Gram Altın", api:"Gram Altın"},
-    {ad:"Çeyrek Altın"}, {ad:"Yarım Altın"}, {ad:"Tam Altın"},
-    {ad:"Cumhuriyet Altını"}, {ad:"Reşat Altın"}, {ad:"Ata Altın"}, {ad:"Beşli Altın"},
-    {ad:"USD", api:"USD"}, {ad:"EUR", api:"EUR"}, {ad:"Bank", manuel:true}
+    {ad:"Çeyrek Altın"},
+    {ad:"Yarım Altın"},
+    {ad:"Tam Altın"},
+    {ad:"Cumhuriyet Altını"},
+    {ad:"Reşat Altın"},
+    {ad:"Ata Altın"},
+    {ad:"Beşli Altın"},
+    {ad:"USD", api:"USD"},
+    {ad:"EUR", api:"EUR"},
+    {ad:"Bank", manuel:true}
 ];
 
 let fiyatlar={}, apiGuncellemeZamani="";
@@ -134,7 +149,7 @@ function hesapla(){
     const manuel14=Number(document.getElementById("manuel14").value);
 
     const fiyat24 = manuel24 || (fiyatlar["Gram Altın"] ? (fiyatlar["Gram Altın"].buying+fiyatlar["Gram Altın"].selling)/2 :0);
-    const fiyat22 = manuel22 || fiyat24*0.916*KATSAYI_22AYAR;
+    const fiyat22 = manuel22 || fiyat24*(22/24)*KATSAYI_22AYAR;
     const fiyat18 = manuel18 || fiyat24*(18/24)*KATSAYI_22AYAR;
     const fiyat14 = manuel14 || fiyat24*(14/24)*KATSAYI_22AYAR;
 
