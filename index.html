@@ -6,59 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background:#f4f4f4;
-    max-width:900px;
-    margin:auto;
-    padding:15px;
-}
+body { font-family: Arial, sans-serif; background:#f4f4f4; max-width:900px; margin:auto; padding:15px; }
 h2 { text-align:center; }
-
-table {
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-    table-layout: fixed; /* sütunların kaymasını önler */
-}
-th, td {
-    border:1px solid #ccc;
-    padding:8px;
-    text-align:center;
-    word-wrap: break-word;
-}
+table { width:100%; border-collapse:collapse; margin-top:15px; table-layout: fixed; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; word-wrap: break-word; }
 th { background:#eaeaea; }
-
 input { width:60px; padding:5px; }
-
-.butonlar {
-    display:flex;
-    gap:10px;
-    margin-top:15px;
-}
-button {
-    flex:1;
-    padding:10px;
-    font-size:16px;
-}
-
-.toplam {
-    margin-top:20px;
-    font-size:24px;
-    text-align:right;
-    font-weight:bold;
-}
-
-@media (max-width:600px) {
-    input { width:50px; }
-    table { display:block; overflow-x:auto; }
-}
-
-/* DARK MODE */
-body.dark {
-    background:#121212;
-    color:#eaeaea;
-}
+.butonlar { display:flex; gap:10px; margin-top:15px; }
+button { flex:1; padding:10px; font-size:16px; }
+.toplam { margin-top:20px; font-size:24px; text-align:right; font-weight:bold; }
+@media (max-width:600px) { input { width:50px; } table { display:block; overflow-x:auto; } }
+body.dark { background:#121212; color:#eaeaea; }
 body.dark th { background:#1f1f1f; }
 body.dark td { border-color:#333; }
 body.dark input { background:#1e1e1e; color:#fff; border:1px solid #444; }
@@ -90,100 +48,75 @@ body.dark button { background:#333; color:#fff; }
 </div>
 
 <div class="toplam" id="toplam">Toplam: —</div>
+
+<!-- MANUEL FİYATLAR -->
 <div style="margin-top:10px;">
 <label>Manuel 22 Ayar Fiyat (opsiyonel, TL): </label>
 <input type="number" step="0.01" id="manuel22" placeholder="Boşsa API fiyatı kullanılır">
 </div>
+<div style="margin-top:5px;">
+<label>Manuel 24 Ayar Fiyat (opsiyonel, TL): </label>
+<input type="number" step="0.01" id="manuel24" placeholder="Boşsa API fiyatı kullanılır">
+</div>
+<div style="margin-top:5px;">
+<label>Manuel 18 Ayar Fiyat (opsiyonel, TL): </label>
+<input type="number" step="0.01" id="manuel18" placeholder="Boşsa API fiyatı kullanılır">
+</div>
+<div style="margin-top:5px;">
+<label>Manuel 14 Ayar Fiyat (opsiyonel, TL): </label>
+<input type="number" step="0.01" id="manuel14" placeholder="Boşsa API fiyatı kullanılır">
+</div>
+
 <div style="margin-top:5px;">
 <span id="apiGuncelleme">API Son Güncelleme: —</span>
 </div>
 
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
-
-/* 🔐 ALTIN GRAMAJLARI (22 AYAR) */
 const ALTIN_GRAM = {
-    "24 Ayar Gram Altın": 1,
-    "22 Ayar Gram Altın": 1,
-    "18 Ayar Gram Altın": 1,   // gramı 1, fiyatı hesaplamada katsayı ile düzelecek
-    "14 Ayar Gram Altın": 1,   // gramı 1
-    "Çeyrek Altın": 1.75,
-    "Yarım Altın": 3.5,
-    "Tam Altın": 7.2,
-    "Cumhuriyet Altını": 7.2,
-    "Reşat Altın": 7.2,
-    "Ata Altın": 7.2,
-    "Beşli Altın": 36           // 5 adet Reşat veya Ata
+    "24 Ayar Gram Altın": 1, "22 Ayar Gram Altın": 1, "18 Ayar Gram Altın": 1, "14 Ayar Gram Altın": 1,
+    "Çeyrek Altın":1.75, "Yarım Altın":3.5, "Tam Altın":7.2, "Cumhuriyet Altını":7.2,
+    "Reşat Altın":7.2, "Ata Altın":7.2, "Beşli Altın":36
 };
-
-
-/* 22 AYAR KATSAYISI (senin geleneksel fiyatına yakınlaştırma) */
 const KATSAYI_22AYAR = 1.0515;
 
 const varliklar = [
-    { ad:"24 Ayar Gram Altın", api:"Gram Altın" },
-    { ad:"22 Ayar Gram Altın", api:"Gram Altın", katsayi:0.916 },
-    { ad:"18 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.818 },
-    { ad:"14 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.636 },
-    { ad:"Çeyrek Altın" },
-    { ad:"Yarım Altın" },
-    { ad:"Tam Altın" },
-    { ad:"Cumhuriyet Altını" },
-    { ad:"Reşat Altın" },
-    { ad:"Ata Altın" },
-    { ad:"Beşli Altın" },
-    { ad:"USD", api:"USD" },
-    { ad:"EUR", api:"EUR" },
-    { ad:"Bank", manuel:true }
+    {ad:"24 Ayar Gram Altın", api:"Gram Altın"},
+    {ad:"22 Ayar Gram Altın", api:"Gram Altın"},
+    {ad:"18 Ayar Gram Altın", api:"Gram Altın"},
+    {ad:"14 Ayar Gram Altın", api:"Gram Altın"},
+    {ad:"Çeyrek Altın"}, {ad:"Yarım Altın"}, {ad:"Tam Altın"},
+    {ad:"Cumhuriyet Altını"}, {ad:"Reşat Altın"}, {ad:"Ata Altın"}, {ad:"Beşli Altın"},
+    {ad:"USD", api:"USD"}, {ad:"EUR", api:"EUR"}, {ad:"Bank", manuel:true}
 ];
 
-let fiyatlar = {};
-let apiGuncellemeZamani = "";
+let fiyatlar = {}, apiGuncellemeZamani="";
 
-async function baslat() {
-    try {
-        const altinRes = await fetch(
-            "https://api.collectapi.com/economy/goldPrice",
-            { headers:{ authorization:"apikey "+API_KEY } }
-        );
+async function baslat(){
+    try{
+        const altinRes = await fetch("https://api.collectapi.com/economy/goldPrice",
+            { headers:{ authorization:"apikey "+API_KEY } });
         const altinData = await altinRes.json();
         apiGuncellemeZamani = new Date().toLocaleString();
-
         altinData.result.forEach(i=>{
-            fiyatlar[i.name] = {
-                buying: Number(i.buying),
-                selling: Number(i.selling)
-            };
+            fiyatlar[i.name]={buying:Number(i.buying), selling:Number(i.selling)};
         });
-
-        const dovizRes = await fetch(
-            "https://api.collectapi.com/economy/allCurrency",
-            { headers:{ authorization:"apikey "+API_KEY } }
-        );
+        const dovizRes = await fetch("https://api.collectapi.com/economy/allCurrency",
+            { headers:{ authorization:"apikey "+API_KEY } });
         const dovizData = await dovizRes.json();
-
         dovizData.result.forEach(i=>{
-            if(i.code === "USD" || i.code === "EUR"){
-                fiyatlar[i.code] = {
-                    buying: Number(i.buying || i.rate),
-                    selling: Number(i.selling || i.rate)
-                };
+            if(i.code==="USD"||i.code==="EUR"){
+                fiyatlar[i.code]={buying:Number(i.buying||i.rate), selling:Number(i.selling||i.rate)};
             }
         });
-
-        tabloKur();
-        yukle();
-    } catch(e){
-        console.error("API Hatası:", e);
-    }
+        tabloKur(); yukle();
+    }catch(e){ console.error("API Hatası:",e);}
 }
 
-function tabloKur() {
-    const t = document.getElementById("tablo");
-    t.innerHTML = "";
+function tabloKur(){
+    const t=document.getElementById("tablo"); t.innerHTML="";
     varliklar.forEach((v,i)=>{
-        t.innerHTML += `
-        <tr>
+        t.innerHTML += `<tr>
             <td>${v.ad}</td>
             <td><input type="number" step="0.01" id="m${i}"></td>
             <td id="gram${i}">—</td>
@@ -191,118 +124,66 @@ function tabloKur() {
             <td id="s${i}">—</td>
         </tr>`;
     });
-    document.getElementById("apiGuncelleme").innerText = "API Son Güncelleme: " + apiGuncellemeZamani;
+    document.getElementById("apiGuncelleme").innerText = "API Son Güncelleme: "+apiGuncellemeZamani;
 }
 
-function hesapla() {
-    let toplamTL = 0;
-    let toplamGram = 0;
+function hesapla(){
+    let toplamTL=0, toplamGram=0;
 
-    let manuelFiyat = Number(document.getElementById("manuel22").value);
+    const manuel22=Number(document.getElementById("manuel22").value);
+    const manuel24=Number(document.getElementById("manuel24").value);
+    const manuel18=Number(document.getElementById("manuel18").value);
+    const manuel14=Number(document.getElementById("manuel14").value);
 
-    // 24 ayar fiyatı API'den
-    const fiyat24 = fiyatlar["Gram Altın"] 
-        ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2
-        : 0;
-
-    // 22 ayar fiyatı (manuel girilmişse manuel, yoksa 24*0.916*1.0515)
-    const fiyat22 = manuelFiyat || (fiyat24 * 0.916 * KATSAYI_22AYAR);
+    const fiyat24 = manuel24 || (fiyatlar["Gram Altın"] ? (fiyatlar["Gram Altın"].buying+fiyatlar["Gram Altın"].selling)/2 :0);
+    const fiyat22 = manuel22 || fiyat24*0.916*KATSAYI_22AYAR;
+    const fiyat18 = manuel18 || fiyat24*(18/24);
+    const fiyat14 = manuel14 || fiyat24*(14/24);
 
     varliklar.forEach((v,i)=>{
-        const miktar = Number(document.getElementById("m"+i).value);
-        if (!miktar) {
-            document.getElementById("gram"+i).innerText = "—";
-            document.getElementById("birim"+i).innerText = "—";
-            document.getElementById("s"+i).innerText = "—";
-            return;
-        }
-
-        if(v.manuel){
-            document.getElementById("s"+i).innerText = miktar.toFixed(2)+" TL";
-            document.getElementById("gram"+i).innerText = "—";
-            document.getElementById("birim"+i).innerText = "—";
-            toplamTL += miktar;
-            return;
-        }
-
-        if(v.api === "USD" || v.api === "EUR"){
-            const f = fiyatlar[v.api];
-            const tl = miktar * f.selling;
-            document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
-            document.getElementById("gram"+i).innerText = "—";
-            document.getElementById("birim"+i).innerText = f.selling.toFixed(2) + " TL";
-            toplamTL += tl;
-            return;
-        }
-
-        // Altın
-        const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
-        toplamGram += gram;
-
+        const miktar=Number(document.getElementById("m"+i).value);
+        if(!miktar){ document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText="—"; document.getElementById("s"+i).innerText="—"; return;}
+        if(v.manuel){ document.getElementById("s"+i).innerText=miktar.toFixed(2)+" TL"; document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText="—"; toplamTL+=miktar; return;}
+        if(v.api==="USD"||v.api==="EUR"){ const f=fiyatlar[v.api]; const tl=miktar*f.selling; document.getElementById("s"+i).innerText=tl.toFixed(2)+" TL"; document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText=f.selling.toFixed(2)+" TL"; toplamTL+=tl; return;}
+        const gram=(ALTIN_GRAM[v.ad]||0)*miktar; toplamGram+=gram;
         let fiyat;
         switch(v.ad){
-            case "22 Ayar Gram Altın":
-                fiyat = fiyat22;
-                break;
-            case "18 Ayar Gram Altın":
-                fiyat = fiyat24 * 0.75;
-                break;
-            case "14 Ayar Gram Altın":
-                fiyat = fiyat24 * 0.585;
-                break;
-            case "24 Ayar Gram Altın":
-                fiyat = fiyat24;
-                break;
-            default:
-                const ayarKatsayi = v.ayarKatsayi || 1;
-                fiyat = fiyat22 * ayarKatsayi;
+            case "22 Ayar Gram Altın": fiyat=fiyat22; break;
+            case "24 Ayar Gram Altın": fiyat=fiyat24; break;
+            case "18 Ayar Gram Altın": fiyat=fiyat18; break;
+            case "14 Ayar Gram Altın": fiyat=fiyat14; break;
+            default: const ayarKatsayi=v.ayarKatsayi||1; fiyat=fiyat22*ayarKatsayi;
         }
-
-        const tl = gram * fiyat;
-        document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
-        document.getElementById("gram"+i).innerText = gram.toFixed(2) + " gr";
-        document.getElementById("birim"+i).innerText = (tl/miktar).toFixed(2) + " TL";
-        toplamTL += tl;
+        const tl=gram*fiyat;
+        document.getElementById("s"+i).innerText=tl.toFixed(2)+" TL";
+        document.getElementById("gram"+i).innerText=gram.toFixed(2)+" gr";
+        document.getElementById("birim"+i).innerText=(tl/miktar).toFixed(2)+" TL";
+        toplamTL+=tl;
     });
 
-    document.getElementById("toplam").innerText =
-        `Toplam: ${toplamTL.toFixed(2)} TL | Toplam Gram Altın: ${toplamGram.toFixed(2)} gr`;
+    document.getElementById("toplam").innerText=`Toplam: ${toplamTL.toFixed(2)} TL | Toplam Gram Altın: ${toplamGram.toFixed(2)} gr`;
 }
 
-function yukle() {
-    varliklar.forEach((v,i)=>{
-        const val = localStorage.getItem("m"+i);
-        if(val) document.getElementById("m"+i).value = val;
+function yukle(){
+    varliklar.forEach((v,i)=>{ const val=localStorage.getItem("m"+i); if(val) document.getElementById("m"+i).value=val; });
+    ["manuel22","manuel24","manuel18","manuel14"].forEach(id=>{
+        const val=localStorage.getItem(id); if(val) document.getElementById(id).value=val;
     });
-    const manuelVal = localStorage.getItem("manuel22");
-    if(manuelVal) document.getElementById("manuel22").value = manuelVal;
 }
 
-function temizle() {
-    varliklar.forEach((v,i)=>{
-        document.getElementById("m"+i).value = "";
-        document.getElementById("s"+i).innerText = "—";
-        document.getElementById("gram"+i).innerText = "—";
-        document.getElementById("birim"+i).innerText = "—";
-        localStorage.removeItem("m"+i);
-    });
-    document.getElementById("manuel22").value = "";
-    localStorage.removeItem("manuel22");
-    document.getElementById("toplam").innerText = "Toplam: —";
+function temizle(){
+    varliklar.forEach((v,i)=>{ document.getElementById("m"+i).value=""; document.getElementById("s"+i).innerText="—"; document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText="—"; localStorage.removeItem("m"+i); });
+    ["manuel22","manuel24","manuel18","manuel14"].forEach(id=>localStorage.removeItem(id));
+    document.getElementById("toplam").innerText="Toplam: —";
 }
 
-function temaDegistir() {
+function temaDegistir(){
     document.body.classList.toggle("dark");
-    const koyuMu = document.body.classList.contains("dark");
-    localStorage.setItem("tema", koyuMu ? "dark" : "light");
-    document.getElementById("temaBtn").innerText =
-        koyuMu ? "☀️ Açık Mod" : "🌙 Koyu Mod";
+    const koyuMu=document.body.classList.contains("dark");
+    localStorage.setItem("tema",koyuMu?"dark":"light");
+    document.getElementById("temaBtn").innerText=koyuMu?"☀️ Açık Mod":"🌙 Koyu Mod";
 }
-
-if (localStorage.getItem("tema") === "dark") {
-    document.body.classList.add("dark");
-    window.onload = () => temaBtn.innerText = "☀️ Açık Mod";
-}
+if(localStorage.getItem("tema")==="dark"){ document.body.classList.add("dark"); window.onload=()=>temaBtn.innerText="☀️ Açık Mod"; }
 
 baslat();
 </script>
