@@ -19,15 +19,17 @@ table {
     width:100%;
     border-collapse:collapse;
     margin-top:15px;
+    table-layout: fixed; /* sütunların kaymasını önler */
 }
 th, td {
     border:1px solid #ccc;
     padding:8px;
     text-align:center;
+    word-wrap: break-word;
 }
 th { background:#eaeaea; }
 
-input { width:80px; padding:5px; }
+input { width:60px; padding:5px; }
 
 .butonlar {
     display:flex;
@@ -48,7 +50,8 @@ button {
 }
 
 @media (max-width:600px) {
-    input { width:65px; }
+    input { width:50px; }
+    table { display:block; overflow-x:auto; }
 }
 
 /* DARK MODE */
@@ -188,15 +191,12 @@ function hesapla() {
     let toplamTL = 0;
     let toplamGram = 0;
 
-    // Manuel kutu
     let manuelFiyat = Number(document.getElementById("manuel22").value);
 
-    // API’den gelen ortalama 22 ayar fiyat
     const API_ORTALAMA = fiyatlar["Gram Altın"] 
-        ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2 * 0.916 // 22 ayar dönüşümü
+        ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2 * 0.916
         : 0;
 
-    // Fiyat22 = manuel girilmişse manuel, yoksa API * klasik katsayı
     const fiyat22 = manuelFiyat || (API_ORTALAMA * KATSAYI_22AYAR);
 
     varliklar.forEach((v,i)=>{
@@ -208,7 +208,6 @@ function hesapla() {
             return;
         }
 
-        // Manuel banka girişi
         if(v.manuel){
             document.getElementById("s"+i).innerText = miktar.toFixed(2)+" TL";
             document.getElementById("gram"+i).innerText = "—";
@@ -217,7 +216,6 @@ function hesapla() {
             return;
         }
 
-        // Döviz
         if(v.api === "USD" || v.api === "EUR"){
             const f = fiyatlar[v.api];
             const tl = miktar * f.selling;
@@ -228,7 +226,6 @@ function hesapla() {
             return;
         }
 
-        // Altın
         const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
         toplamGram += gram;
 
