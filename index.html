@@ -105,13 +105,17 @@ const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 const ALTIN_GRAM = {
     "24 Ayar Gram Altın": 1,
     "22 Ayar Gram Altın": 1,
+    "18 Ayar Gram Altın": 1,   // gramı 1, fiyatı hesaplamada katsayı ile düzelecek
+    "14 Ayar Gram Altın": 1,   // gramı 1
     "Çeyrek Altın": 1.75,
     "Yarım Altın": 3.5,
     "Tam Altın": 7.2,
     "Cumhuriyet Altını": 7.2,
     "Reşat Altın": 7.2,
-    "Ata Altın": 7.2
+    "Ata Altın": 7.2,
+    "Beşli Altın": 36           // 5 adet Reşat veya Ata
 };
+
 
 /* 22 AYAR KATSAYISI (senin geleneksel fiyatına yakınlaştırma) */
 const KATSAYI_22AYAR = 1.0515;
@@ -119,12 +123,15 @@ const KATSAYI_22AYAR = 1.0515;
 const varliklar = [
     { ad:"24 Ayar Gram Altın", api:"Gram Altın" },
     { ad:"22 Ayar Gram Altın", api:"Gram Altın", katsayi:0.916 },
+    { ad:"18 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.818 },
+    { ad:"14 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.636 },
     { ad:"Çeyrek Altın" },
     { ad:"Yarım Altın" },
     { ad:"Tam Altın" },
     { ad:"Cumhuriyet Altını" },
     { ad:"Reşat Altın" },
     { ad:"Ata Altın" },
+    { ad:"Beşli Altın" },
     { ad:"USD", api:"USD" },
     { ad:"EUR", api:"EUR" },
     { ad:"Bank", manuel:true }
@@ -226,14 +233,19 @@ function hesapla() {
             return;
         }
 
-        const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
-        toplamGram += gram;
+// Altın
+const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
+toplamGram += gram;
 
-        const tl = gram * fiyat22;
-        document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
-        document.getElementById("gram"+i).innerText = gram.toFixed(2) + " gr";
-        document.getElementById("birim"+i).innerText = (tl/miktar).toFixed(2) + " TL";
-        toplamTL += tl;
+// Eğer ayar katsayısı varsa uygula, yoksa 1
+const ayarKatsayi = v.ayarKatsayi || 1;
+const fiyat = fiyat22 * ayarKatsayi;
+
+const tl = gram * fiyat;
+document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
+document.getElementById("gram"+i).innerText = gram.toFixed(2) + " gr";
+document.getElementById("birim"+i).innerText = (tl/miktar).toFixed(2) + " TL";
+toplamTL += tl;
     });
 
     document.getElementById("toplam").innerText =
