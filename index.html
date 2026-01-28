@@ -1,3 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Altın & Döviz Hesaplama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    max-width:900px;
+    margin:auto;
+    padding:15px;
+}
+h2 { text-align:center; }
+
+table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th, td {
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+th { background:#eaeaea; }
+
+input, select {
+    width:80px;
+    padding:5px;
+}
+
+.butonlar {
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+button {
+    flex:1;
+    padding:10px;
+    font-size:16px;
+}
+
+.toplam {
+    margin-top:20px;
+    font-size:24px;
+    text-align:right;
+    font-weight:bold;
+}
+
+@media (max-width:600px) {
+    input, select { width:65px; }
+}
+
+/* DARK MODE */
+body.dark {
+    background:#121212;
+    color:#eaeaea;
+}
+body.dark th { background:#1f1f1f; }
+body.dark td { border-color:#333; }
+body.dark input, body.dark select {
+    background:#1e1e1e;
+    color:#fff;
+    border:1px solid #444;
+}
+body.dark button { background:#333; color:#fff; }
+</style>
+</head>
+
+<body>
+
+<h2>Altın & Döviz Hesaplama</h2>
+<button id="temaBtn" onclick="temaDegistir()">🌙 Koyu Mod</button>
+
+<table>
+<thead>
+<tr>
+<th>Tür</th>
+<th>Fiyat Türü</th>
+<th>Gram / Adet</th>
+<th>Tutar (TL)</th>
+</tr>
+</thead>
+<tbody id="tablo"></tbody>
+</table>
+
+<div class="butonlar">
+<button onclick="hesapla()">HESAPLA</button>
+<button onclick="temizle()">TEMİZLE</button>
+</div>
+
+<div class="toplam" id="toplam">Toplam: —</div>
+
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 
@@ -111,3 +207,6 @@ function hesapla() {
 
 baslat();
 </script>
+
+</body>
+</html>
