@@ -50,11 +50,10 @@ button {
     font-weight:bold;
 }
 
-.apiGuncelleme {
-    margin-top:5px;
-    text-align:right;
-    font-size:12px;
-    color:#555;
+#manuel22 {
+    margin-top:10px;
+    width:100px;
+    padding:5px;
 }
 
 @media (max-width:600px) {
@@ -74,7 +73,6 @@ body.dark input, body.dark select {
     border:1px solid #444;
 }
 body.dark button { background:#333; color:#fff; }
-body.dark .apiGuncelleme { color:#aaa; }
 </style>
 </head>
 
@@ -100,13 +98,17 @@ body.dark .apiGuncelleme { color:#aaa; }
 <button onclick="temizle()">TEMİZLE</button>
 </div>
 
+<div>
+    <label>Manuel 22 Ayar Fiyat (TL): </label>
+    <input type="number" id="manuel22" placeholder="Boş = API" step="0.01">
+</div>
+
 <div class="toplam" id="toplam">Toplam: —</div>
-<div class="apiGuncelleme" id="apiGuncelleme">API Son Güncelleme: —</div>
 
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 
-/* Altın gramajları */
+/* 🔐 ALTIN GRAMAJLARI (22 AYAR) */
 const ALTIN_GRAM = {
     "24 Ayar Gram Altın": 1,
     "22 Ayar Gram Altın": 1,
@@ -133,65 +135,56 @@ const varliklar = [
 ];
 
 let fiyatlar = {};
-let apiGuncellemeTarihi = '';
 
+/* ✅ 22 AYAR KUYUMCU ORTALAMASI */
 function ortalamaFiyat(buy, sell) {
     return (buy + sell) / 2;
 }
 
 async function baslat() {
-    try {
-        // ALTIN
-        const altinRes = await fetch(
-            "https://api.collectapi.com/economy/goldPrice",
-            { headers:{ authorization:"apikey "+API_KEY } }
-        );
-        const altinData = await altinRes.json();
-        altinData.result.forEach(i=>{
-            fiyatlar[i.name] = {
-                buying: Number(i.buying),
-                selling: Number(i.selling)
+
+    const altinRes = await fetch(
+        "https://api.collectapi.com/economy/goldPrice",
+        { headers:{ authorization:"apikey "+API_KEY } }
+    );
+    const altinData = await altinRes.json();
+
+    altinData.result.forEach(i=>{
+        fiyatlar[i.name] = {
+            buying: Number(i.buying),
+            selling: Number(i.selling)
+        };
+    });
+
+    const dovizRes = await fetch(
+        "https://api.collectapi.com/economy/allCurrency",
+        { headers:{ authorization:"apikey "+API_KEY } }
+    );
+    const dovizData = await dovizRes.json();
+
+    dovizData.result.forEach(i=>{
+        if(i.code === "USD" || i.code === "EUR"){
+            fiyatlar[i.code] = {
+                buying: Number(i.buying || i.rate),
+                selling: Number(i.selling || i.rate)
             };
-        });
-
-        if (!fiyatlar["Reşat Altın"] && fiyatlar["Cumhuriyet Altını"]) {
-            fiyatlar["Reşat Altın"] = fiyatlar["Cumhuriyet Altını"];
         }
+    });
 
-        // DÖVİZ
-        const dovizRes = await fetch(
-            "https://api.collectapi.com/economy/allCurrency",
-            { headers:{ authorization:"apikey "+API_KEY } }
-        );
-        const dovizData = await dovizRes.json();
-        dovizData.result.forEach(i=>{
-            if(i.code === "USD" || i.code === "EUR"){
-                fiyatlar[i.code] = {
-                    buying: Number(i.buying || i.rate),
-                    selling: Number(i.selling || i.rate)
-                };
-            }
-        });
-
-        apiGuncellemeTarihi = new Date().toLocaleTimeString();
-        document.getElementById("apiGuncelleme").innerText = "API Son Güncelleme: " + apiGuncellemeTarihi;
-
-        tabloKur();
-        yukle();
-    } catch(e) {
-        console.error("API Hatası:", e);
-    }
+    tabloKur();
+    yukle();
 }
 
 function tabloKur() {
     const t = document.getElementById("tablo");
-    t.innerHTML = '';
+    t.innerHTML = "";
     varliklar.forEach((v,i)=>{
         t.innerHTML += `
         <tr>
             <td>${v.ad}</td>
             <td>
-                ${v.manuel ? '-' : `<select id="t${i}">
+                ${v.manuel ? "-" : `
+                <select id="t${i}">
                     <option value="ortalama" selected>Ortalama</option>
                     <option value="selling">Satış</option>
                     <option value="buying">Alış</option>
@@ -207,8 +200,15 @@ function hesapla() {
     let toplamTL = 0;
     let toplamGram = 0;
 
+    // 🔑 Manuel fiyat kutucuğu kontrol
+    const manuelFiyatInput = Number(document.getElementById("manuel22").value);
+    const kullanManual = !!manuelFiyatInput;
+
+    // 22 Ayar fiyatı
     const g22 = fiyatlar["Gram Altın"];
-    const fiyat22 = ortalamaFiyat(g22.buying, g22.selling) * 0.916;
+    const fiyat22 = kullanManual
+        ? manuelFiyatInput
+        : ortalamaFiyat(g22.buying, g22.selling) * 0.916;
 
     varliklar.forEach((v,i)=>{
         const miktar = Number(document.getElementById("m"+i).value);
@@ -218,11 +218,10 @@ function hesapla() {
         if (v.manuel) {
             document.getElementById("s"+i).innerText = miktar.toFixed(2)+" TL";
             toplamTL += miktar;
-            localStorage.setItem("m"+i, miktar);
             return;
         }
 
-        // Döviz
+        // DÖVİZ
         if (v.api === "USD" || v.api === "EUR") {
             const f = fiyatlar[v.api];
             const tl = miktar * f.selling;
@@ -231,14 +230,13 @@ function hesapla() {
             return;
         }
 
-        // Altın
+        // ALTIN → GRAM HAVUZU
         const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
         toplamGram += gram;
+
         const tl = gram * fiyat22;
         document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
         toplamTL += tl;
-
-        localStorage.setItem("m"+i, miktar);
     });
 
     document.getElementById("toplam").innerText =
@@ -258,6 +256,7 @@ function temizle() {
         document.getElementById("s"+i).innerText = "—";
         localStorage.removeItem("m"+i);
     });
+    document.getElementById("manuel22").value = "";
     document.getElementById("toplam").innerText = "Toplam: —";
 }
 
