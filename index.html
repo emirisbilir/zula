@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Altın Hesaplama</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .sonuc {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #00ff99;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Gram Altın Hesaplama</h2>
+
+  <input type="number" id="gram" placeholder="Kaç gram?" />
+
+  <div class="sonuc" id="sonuc">—</div>
+
+  <script>
+    const API_KEY = "BURAYA_API_KEY_YAZ";
+
+    async function fiyatCek() {
+      const res = await fetch(
+        "https://api.collectapi.com/economy/goldPrice",
+        {
+          headers: {
+            "authorization": "apikey " + API_KEY
+          }
+        }
+      );
+      const data = await res.json();
+      return parseFloat(data.result[0].selling);
+    }
+
+    const gramInput = document.getElementById("gram");
+    const sonucDiv = document.getElementById("sonuc");
+
+    let gramFiyat = 0;
+
+    fiyatCek().then(fiyat => {
+      gramFiyat = fiyat;
+    });
+
+    gramInput.addEventListener("input", () => {
+      const gram = parseFloat(gramInput.value);
+      if (!gram || !gramFiyat) {
+        sonucDiv.innerText = "—";
+        return;
+      }
+      const toplam = gram * gramFiyat;
+      sonucDiv.innerText = `${toplam.toFixed(2)} TL`;
+    });
+  </script>
+
+</body>
+</html>
