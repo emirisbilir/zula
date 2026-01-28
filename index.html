@@ -58,6 +58,7 @@ button {
     input {
         width:65px;
     }
+}
     /* DARK MODE */
 body.dark {
     background:#121212;
@@ -146,16 +147,20 @@ async function baslat() {
         fiyatlar[i.name] = Number(i.selling);
     });
 
-    // Reşat Altın fix (API'de yoksa Cumhuriyet'ten türet)
-if (!fiyatlar["Reşat Altın"] && fiyatlar["Cumhuriyet Altını"]) {
-    fiyatlar["Reşat Altın"] = fiyatlar["Cumhuriyet Altını"];
+if (!fiyatlar["Reşat Altın"]) {
+    fiyatlar["Reşat Altın"] =
+        fiyatlar["Cumhuriyet Altını"] ||
+        fiyatlar["Cumhuriyet Altini"];
 }
 
     /* DÖVİZ */
-    const dovizRes = await fetch(
-        "https://api.collectapi.com/economy/allCurrency",
-        { headers:{ authorization:"apikey "+API_KEY } }
-    );
+const dovizRes = await fetch(
+    "https://api.collectapi.com/economy/allCurrency",
+    { headers:{ authorization:"apikey "+API_KEY } }
+);
+
+const dovizData = await dovizRes.json();
+
 dovizData.result.forEach(i => {
     if (i.code === "USD") {
         fiyatlar["USD"] = Number(i.selling || i.rate);
