@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Altın Hesaplama</title>
+  <title>Altın Hesaplama (Kişisel)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,62 +12,104 @@
       max-width: 400px;
       margin: auto;
     }
-    input {
+    select, input, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
       font-size: 16px;
+    }
+    button {
+      background: #00ff99;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
     }
     .sonuc {
       margin-top: 20px;
       font-size: 18px;
       color: #00ff99;
     }
+    .info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
 
-  <h2>Gram Altın Hesaplama</h2>
+  <h2>Altın Hesaplama</h2>
 
-  <input type="number" id="gram" placeholder="Kaç gram?" />
+  <select id="altinTuru">
+    <option value="">Altın türü seç</option>
+  </select>
+
+  <input type="number" id="miktar" placeholder="Gram / adet" />
+
+  <button id="hesapla">Hesapla</button>
 
   <div class="sonuc" id="sonuc">—</div>
+  <div class="info" id="guncelleme"></div>
 
-  <script>
-    const API_KEY = "BURAYA_API_KEY_YAZ";
+<script>
+  const API_KEY = "BURAYA_API_KEY_YAZ";
 
-    async function fiyatCek() {
-      const res = await fetch(
-        "https://api.collectapi.com/economy/goldPrice",
-        {
-          headers: {
-            "authorization": "apikey " + API_KEY
-          }
+  const altinSelect = document.getElementById("altinTuru");
+  const miktarInput = document.getElementById("miktar");
+  const sonucDiv = document.getElementById("sonuc");
+  const guncellemeDiv = document.getElementById("guncelleme");
+  const hesaplaBtn = document.getElementById("hesapla");
+
+  let fiyatlar = {};
+
+  async function fiyatlariCek() {
+    const res = await fetch(
+      "https://api.collectapi.com/economy/goldPrice",
+      {
+        headers: {
+          "authorization": "apikey " + API_KEY
         }
-      );
-      const data = await res.json();
-      return parseFloat(data.result[0].selling);
+      }
+    );
+
+    const data = await res.json();
+
+    data.result.forEach(item => {
+      fiyatlar[item.name] = parseFloat(item.selling);
+
+      const option = document.createElement("option");
+      option.value = item.name;
+      option.textContent = item.name;
+      altinSelect.appendChild(option);
+    });
+
+    guncellemeDiv.innerText = "Son güncelleme alındı ✔";
+  }
+
+  function hesapla() {
+    const tur = altinSelect.value;
+    const miktar = parseFloat(miktarInput.value);
+
+    if (!tur || !miktar) {
+      sonucDiv.innerText = "Değerleri gir kanka";
+      return;
     }
 
-    const gramInput = document.getElementById("gram");
-    const sonucDiv = document.getElementById("sonuc");
+    const toplam = miktar * fiyatlar[tur];
+    sonucDiv.innerText = toplam.toFixed(2) + " TL";
+  }
 
-    let gramFiyat = 0;
+  hesaplaBtn.addEventListener("click", hesapla);
 
-    fiyatCek().then(fiyat => {
-      gramFiyat = fiyat;
-    });
+  // Enter'a basınca da çalışsın
+  miktarInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      hesapla();
+    }
+  });
 
-    gramInput.addEventListener("input", () => {
-      const gram = parseFloat(gramInput.value);
-      if (!gram || !gramFiyat) {
-        sonucDiv.innerText = "—";
-        return;
-      }
-      const toplam = gram * gramFiyat;
-      sonucDiv.innerText = `${toplam.toFixed(2)} TL`;
-    });
-  </script>
+  fiyatlariCek();
+</script>
 
 </body>
 </html>
