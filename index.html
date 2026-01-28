@@ -123,8 +123,8 @@ const KATSAYI_22AYAR = 1.0515;
 const varliklar = [
     { ad:"24 Ayar Gram Altın", api:"Gram Altın" },
     { ad:"22 Ayar Gram Altın", api:"Gram Altın", katsayi:0.916 },
-    { ad:"18 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.750 },
-    { ad:"14 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.583 },
+    { ad:"18 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.818 },
+    { ad:"14 Ayar Gram Altın", api:"Gram Altın", ayarKatsayi:0.636 },
     { ad:"Çeyrek Altın" },
     { ad:"Yarım Altın" },
     { ad:"Tam Altın" },
@@ -200,11 +200,13 @@ function hesapla() {
 
     let manuelFiyat = Number(document.getElementById("manuel22").value);
 
-    const API_ORTALAMA = fiyatlar["Gram Altın"] 
-        ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2 * 0.916
+    // 24 ayar fiyatı API'den
+    const fiyat24 = fiyatlar["Gram Altın"] 
+        ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2
         : 0;
 
-    const fiyat22 = manuelFiyat || (API_ORTALAMA * KATSAYI_22AYAR);
+    // 22 ayar fiyatı (manuel girilmişse manuel, yoksa API 24*0.916*1.0515)
+    const fiyat22 = manuelFiyat || (fiyat24 * 0.916 * KATSAYI_22AYAR);
 
     varliklar.forEach((v,i)=>{
         const miktar = Number(document.getElementById("m"+i).value);
@@ -233,19 +235,27 @@ function hesapla() {
             return;
         }
 
-// Altın
-const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
-toplamGram += gram;
+        // Altın
+        const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
+        toplamGram += gram;
 
-// Eğer ayar katsayısı varsa uygula, yoksa 1
-const ayarKatsayi = v.ayarKatsayi || 1;
-const fiyat = fiyat22 * ayarKatsayi;
+        let fiyat; 
+        if(v.ad === "22 Ayar Gram Altın"){
+            fiyat = fiyat22; // eski mantık, aynen bırak
+        } else if(v.ad === "18 Ayar Gram Altın"){
+            fiyat = fiyat24 * 0.75; // 18 ayar = %75 saf altın
+        } else if(v.ad === "14 Ayar Gram Altın"){
+            fiyat = fiyat24 * 0.585; // 14 ayar = %58.5 saf altın
+        } else {
+            const ayarKatsayi = v.ayarKatsayi || 1; // diğerleri için
+            fiyat = fiyat22 * ayarKatsayi;
+        }
 
-const tl = gram * fiyat;
-document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
-document.getElementById("gram"+i).innerText = gram.toFixed(2) + " gr";
-document.getElementById("birim"+i).innerText = (tl/miktar).toFixed(2) + " TL";
-toplamTL += tl;
+        const tl = gram * fiyat;
+        document.getElementById("s"+i).innerText = tl.toFixed(2)+" TL";
+        document.getElementById("gram"+i).innerText = gram.toFixed(2) + " gr";
+        document.getElementById("birim"+i).innerText = (tl/miktar).toFixed(2) + " TL";
+        toplamTL += tl;
     });
 
     document.getElementById("toplam").innerText =
