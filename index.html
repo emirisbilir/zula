@@ -2,32 +2,36 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Altın Hesaplama</title>
+<title>Altın & Döviz Hesaplama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background:#f4f4f4;
-    max-width:800px;
+    max-width:900px;
     margin:auto;
-    padding:20px;
+    padding:15px;
 }
 h2 { text-align:center; }
+
 table {
     width:100%;
     border-collapse:collapse;
-    margin-top:20px;
+    margin-top:15px;
 }
 th, td {
     border:1px solid #ccc;
     padding:8px;
     text-align:center;
 }
-th { background:#eee; }
+th { background:#eaeaea; }
+
 input {
-    width:90px;
-    padding:4px;
+    width:80px;
+    padding:5px;
 }
+
 .butonlar {
     display:flex;
     gap:10px;
@@ -37,30 +41,40 @@ button {
     flex:1;
     padding:10px;
     font-size:16px;
-    cursor:pointer;
 }
+
 .toplam {
     margin-top:20px;
-    font-size:22px;
+    font-size:24px;
     text-align:right;
     font-weight:bold;
+}
+
+/* Mobil */
+@media (max-width:600px) {
+    table, thead, tbody, tr, th, td {
+        font-size:14px;
+    }
+    input {
+        width:65px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<h2>Altın Hesaplama</h2>
+<h2>Altın & Döviz Hesaplama</h2>
 
 <table>
 <thead>
 <tr>
-<th>Altın Türü</th>
+<th>Tür</th>
 <th>Gram / Adet</th>
 <th>Tutar (TL)</th>
 </tr>
 </thead>
-<tbody id="altinTablo"></tbody>
+<tbody id="tablo"></tbody>
 </table>
 
 <div class="butonlar">
@@ -73,87 +87,80 @@ button {
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 
-/* 
-API name  -> senin tabloda gözüken isim
-*/
-const altinlar = [
-    { ad: "24 Ayar Gram Altın", api: "Gram Altın", tip: "gram" },
-    { ad: "22 Ayar Gram Altın", api: "Gram Altın", katsayi: 0.916, tip: "gram" },
-    { ad: "Çeyrek Altın", api: "Çeyrek Altın", tip: "adet" },
-    { ad: "Yarım Altın", api: "Yarım Altın", tip: "adet" },
-    { ad: "Tam Altın", api: "Tam Altın", tip: "adet" },
-    { ad: "Ata Altın", api: "Ata Altın", tip: "adet" },
-    { ad: "Beşli Altın", api: "Beşli Altın", tip: "adet" },
-    { ad: "Reşat Altın", api: "Reşat Altın", tip: "adet" }
+const varliklar = [
+    { ad:"24 Ayar Gram Altın", api:"Gram Altın" },
+    { ad:"22 Ayar Gram Altın", api:"Gram Altın", katsayi:0.916 },
+    { ad:"Çeyrek Altın", api:"Çeyrek Altın" },
+    { ad:"Yarım Altın", api:"Yarım Altın" },
+    { ad:"Tam Altın", api:"Tam Altın" },
+    { ad:"Cumhuriyet Altını", api:"Cumhuriyet Altını" },
+    { ad:"Ata Altın", api:"Ata Altın" },
+    { ad:"USD", api:"USD/TRY" },
+    { ad:"EUR", api:"EUR/TRY" }
 ];
 
 let fiyatlar = {};
 
 async function baslat() {
-    const res = await fetch(
-        "https://api.collectapi.com/economy/goldPrice",
-        {
-            headers: {
-                authorization: "apikey " + API_KEY
-            }
-        }
-    );
+    const res = await fetch("https://api.collectapi.com/economy/allCurrency", {
+        headers:{ authorization:"apikey "+API_KEY }
+    });
     const data = await res.json();
 
-    data.result.forEach(item => {
-        fiyatlar[item.name] = Number(item.selling);
+    data.result.forEach(i => {
+        fiyatlar[i.name] = Number(i.selling);
     });
 
-    tabloyuKur();
+    tabloKur();
+    yukle();
 }
 
-function tabloyuKur() {
-    const tbody = document.getElementById("altinTablo");
-    tbody.innerHTML = "";
-
-    altinlar.forEach((a, i) => {
-        tbody.innerHTML += `
+function tabloKur() {
+    const t = document.getElementById("tablo");
+    t.innerHTML = "";
+    varliklar.forEach((v,i)=>{
+        t.innerHTML += `
         <tr>
-            <td>${a.ad}</td>
-            <td>
-                <input type="number" step="0.01" id="m_${i}">
-            </td>
-            <td id="s_${i}">—</td>
-        </tr>
-        `;
+            <td>${v.ad}</td>
+            <td><input type="number" step="0.01" id="m${i}"></td>
+            <td id="s${i}">—</td>
+        </tr>`;
     });
 }
 
 function hesapla() {
     let toplam = 0;
+    varliklar.forEach((v,i)=>{
+        const miktar = Number(document.getElementById("m"+i).value);
+        let fiyat = fiyatlar[v.api];
 
-    altinlar.forEach((a, i) => {
-        const miktar = Number(document.getElementById("m_" + i).value);
-        const hucre = document.getElementById("s_" + i);
+        if(v.katsayi) fiyat *= v.katsayi;
 
-        let fiyat = fiyatlar[a.api];
-
-        if (a.katsayi) {
-            fiyat = fiyat * a.katsayi; // 22 ayar fix
-        }
-
-        if (miktar > 0 && fiyat) {
+        if(miktar && fiyat){
             const tutar = miktar * fiyat;
-            hucre.innerText = tutar.toFixed(2) + " TL";
+            document.getElementById("s"+i).innerText = tutar.toFixed(2)+" TL";
             toplam += tutar;
+            localStorage.setItem("m"+i, miktar);
         } else {
-            hucre.innerText = "—";
+            document.getElementById("s"+i).innerText = "—";
         }
     });
-
     document.getElementById("toplam").innerText =
         "Toplam: " + toplam.toFixed(2) + " TL";
 }
 
+function yukle() {
+    varliklar.forEach((v,i)=>{
+        const val = localStorage.getItem("m"+i);
+        if(val) document.getElementById("m"+i).value = val;
+    });
+}
+
 function temizle() {
-    altinlar.forEach((a, i) => {
-        document.getElementById("m_" + i).value = "";
-        document.getElementById("s_" + i).innerText = "—";
+    varliklar.forEach((v,i)=>{
+        document.getElementById("m"+i).value = "";
+        document.getElementById("s"+i).innerText = "—";
+        localStorage.removeItem("m"+i);
     });
     document.getElementById("toplam").innerText = "Toplam: —";
 }
