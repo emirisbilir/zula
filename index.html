@@ -205,7 +205,7 @@ function hesapla() {
         ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2
         : 0;
 
-    // 22 ayar fiyatı (manuel girilmişse manuel, yoksa API 24*0.916*1.0515)
+    // 22 ayar fiyatı (manuel girilmişse manuel, yoksa 24*0.916*1.0515)
     const fiyat22 = manuelFiyat || (fiyat24 * 0.916 * KATSAYI_22AYAR);
 
     varliklar.forEach((v,i)=>{
@@ -239,16 +239,23 @@ function hesapla() {
         const gram = (ALTIN_GRAM[v.ad] || 0) * miktar;
         toplamGram += gram;
 
-        let fiyat; 
-        if(v.ad === "22 Ayar Gram Altın"){
-            fiyat = fiyat22; // eski mantık, aynen bırak
-        } else if(v.ad === "18 Ayar Gram Altın"){
-            fiyat = fiyat24 * 0.75; // 18 ayar = %75 saf altın
-        } else if(v.ad === "14 Ayar Gram Altın"){
-            fiyat = fiyat24 * 0.585; // 14 ayar = %58.5 saf altın
-        } else {
-            const ayarKatsayi = v.ayarKatsayi || 1; // diğerleri için
-            fiyat = fiyat22 * ayarKatsayi;
+        let fiyat;
+        switch(v.ad){
+            case "22 Ayar Gram Altın":
+                fiyat = fiyat22;
+                break;
+            case "18 Ayar Gram Altın":
+                fiyat = fiyat24 * 0.75;
+                break;
+            case "14 Ayar Gram Altın":
+                fiyat = fiyat24 * 0.585;
+                break;
+            case "24 Ayar Gram Altın":
+                fiyat = fiyat24;
+                break;
+            default:
+                const ayarKatsayi = v.ayarKatsayi || 1;
+                fiyat = fiyat22 * ayarKatsayi;
         }
 
         const tl = gram * fiyat;
