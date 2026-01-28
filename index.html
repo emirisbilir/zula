@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Altın & Döviz Hesaplama</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body { font-family: Arial, sans-serif; background:#f4f4f4; max-width:900px; margin:auto; padding:15px; }
 h2 { text-align:center; }
@@ -25,7 +24,6 @@ body.dark button { background:#333; color:#fff; }
 </head>
 
 <body>
-
 <h2>Altın & Döviz Hesaplama</h2>
 <button id="temaBtn" onclick="temaDegistir()">🌙 Koyu Mod</button>
 
@@ -74,7 +72,7 @@ body.dark button { background:#333; color:#fff; }
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 const ALTIN_GRAM = {
-    "24 Ayar Gram Altın": 1, "22 Ayar Gram Altın": 1, "18 Ayar Gram Altın": 1, "14 Ayar Gram Altın": 1,
+    "24 Ayar Gram Altın":1, "22 Ayar Gram Altın":1, "18 Ayar Gram Altın":1, "14 Ayar Gram Altın":1,
     "Çeyrek Altın":1.75, "Yarım Altın":3.5, "Tam Altın":7.2, "Cumhuriyet Altını":7.2,
     "Reşat Altın":7.2, "Ata Altın":7.2, "Beşli Altın":36
 };
@@ -90,7 +88,7 @@ const varliklar = [
     {ad:"USD", api:"USD"}, {ad:"EUR", api:"EUR"}, {ad:"Bank", manuel:true}
 ];
 
-let fiyatlar = {}, apiGuncellemeZamani="";
+let fiyatlar={}, apiGuncellemeZamani="";
 
 async function baslat(){
     try{
@@ -124,7 +122,7 @@ function tabloKur(){
             <td id="s${i}">—</td>
         </tr>`;
     });
-    document.getElementById("apiGuncelleme").innerText = "API Son Güncelleme: "+apiGuncellemeZamani;
+    document.getElementById("apiGuncelleme").innerText="API Son Güncelleme: "+apiGuncellemeZamani;
 }
 
 function hesapla(){
@@ -137,14 +135,15 @@ function hesapla(){
 
     const fiyat24 = manuel24 || (fiyatlar["Gram Altın"] ? (fiyatlar["Gram Altın"].buying+fiyatlar["Gram Altın"].selling)/2 :0);
     const fiyat22 = manuel22 || fiyat24*0.916*KATSAYI_22AYAR;
-    const fiyat18 = manuel18 || fiyat24*(18/24);
-    const fiyat14 = manuel14 || fiyat24*(14/24);
+    const fiyat18 = manuel18 || fiyat24*(18/24)*KATSAYI_22AYAR;
+    const fiyat14 = manuel14 || fiyat24*(14/24)*KATSAYI_22AYAR;
 
     varliklar.forEach((v,i)=>{
         const miktar=Number(document.getElementById("m"+i).value);
         if(!miktar){ document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText="—"; document.getElementById("s"+i).innerText="—"; return;}
         if(v.manuel){ document.getElementById("s"+i).innerText=miktar.toFixed(2)+" TL"; document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText="—"; toplamTL+=miktar; return;}
         if(v.api==="USD"||v.api==="EUR"){ const f=fiyatlar[v.api]; const tl=miktar*f.selling; document.getElementById("s"+i).innerText=tl.toFixed(2)+" TL"; document.getElementById("gram"+i).innerText="—"; document.getElementById("birim"+i).innerText=f.selling.toFixed(2)+" TL"; toplamTL+=tl; return;}
+
         const gram=(ALTIN_GRAM[v.ad]||0)*miktar; toplamGram+=gram;
         let fiyat;
         switch(v.ad){
@@ -166,9 +165,7 @@ function hesapla(){
 
 function yukle(){
     varliklar.forEach((v,i)=>{ const val=localStorage.getItem("m"+i); if(val) document.getElementById("m"+i).value=val; });
-    ["manuel22","manuel24","manuel18","manuel14"].forEach(id=>{
-        const val=localStorage.getItem(id); if(val) document.getElementById(id).value=val;
-    });
+    ["manuel22","manuel24","manuel18","manuel14"].forEach(id=>{ const val=localStorage.getItem(id); if(val) document.getElementById(id).value=val; });
 }
 
 function temizle(){
@@ -187,6 +184,5 @@ if(localStorage.getItem("tema")==="dark"){ document.body.classList.add("dark"); 
 
 baslat();
 </script>
-
 </body>
 </html>
