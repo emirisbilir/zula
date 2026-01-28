@@ -2,113 +2,117 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Altın Hesaplama (Kişisel)</title>
+  <title>Altın Hesaplama</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       background: #111;
       color: #eee;
-      padding: 30px;
-      max-width: 400px;
+      font-family: Arial, sans-serif;
+      max-width: 500px;
       margin: auto;
+      padding: 20px;
     }
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
+    .satir {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
     }
-    button {
-      background: #00ff99;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+    .satir span {
+      width: 140px;
+      font-size: 14px;
     }
-    .sonuc {
+    input {
+      flex: 1;
+      padding: 6px;
+      font-size: 14px;
+    }
+    .toplam {
       margin-top: 20px;
-      font-size: 18px;
+      font-size: 20px;
       color: #00ff99;
-    }
-    .info {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #aaa;
     }
   </style>
 </head>
 <body>
 
-  <h2>Altın Hesaplama</h2>
+<h2>Altın Hesaplama (kişisel)</h2>
 
-  <select id="altinTuru">
-    <option value="">Altın türü seç</option>
-  </select>
+<div id="liste"></div>
 
-  <input type="number" id="miktar" placeholder="Gram / adet" />
-
-  <button id="hesapla">Hesapla</button>
-
-  <div class="sonuc" id="sonuc">—</div>
-  <div class="info" id="guncelleme"></div>
+<div class="toplam" id="toplam">Toplam: —</div>
 
 <script>
-  const API_KEY = "BURAYA_API_KEY_YAZ";
+const API_KEY = "BURAYA_API_KEY_YAZ";
 
-  const altinSelect = document.getElementById("altinTuru");
-  const miktarInput = document.getElementById("miktar");
-  const sonucDiv = document.getElementById("sonuc");
-  const guncellemeDiv = document.getElementById("guncelleme");
-  const hesaplaBtn = document.getElementById("hesapla");
+// Senin istediğin sabit liste
+const kullanilanAltinlar = [
+  "22 Ayar Gram Altın",
+  "Çeyrek Altın",
+  "Yarım Altın",
+  "Ata Altın",
+  "Reşat Altın"
+];
 
-  let fiyatlar = {};
+let fiyatlar = {};
 
-  async function fiyatlariCek() {
-    const res = await fetch(
-      "https://api.collectapi.com/economy/goldPrice",
-      {
-        headers: {
-          "authorization": "apikey " + API_KEY
-        }
-      }
-    );
-
-    const data = await res.json();
-
-    data.result.forEach(item => {
-      fiyatlar[item.name] = parseFloat(item.selling);
-
-      const option = document.createElement("option");
-      option.value = item.name;
-      option.textContent = item.name;
-      altinSelect.appendChild(option);
-    });
-
-    guncellemeDiv.innerText = "Son güncelleme alındı ✔";
-  }
-
-  function hesapla() {
-    const tur = altinSelect.value;
-    const miktar = parseFloat(miktarInput.value);
-
-    if (!tur || !miktar) {
-      sonucDiv.innerText = "Değerleri gir kanka";
-      return;
+async function baslat() {
+  const res = await fetch(
+    "https://api.collectapi.com/economy/goldPrice",
+    {
+      headers: { authorization: "apikey " + API_KEY }
     }
+  );
 
-    const toplam = miktar * fiyatlar[tur];
-    sonucDiv.innerText = toplam.toFixed(2) + " TL";
-  }
+  const data = await res.json();
 
-  hesaplaBtn.addEventListener("click", hesapla);
-
-  // Enter'a basınca da çalışsın
-  miktarInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      hesapla();
+  // Fiyatları map'le
+  data.result.forEach(item => {
+    if (kullanilanAltinlar.includes(item.name)) {
+      fiyatlar[item.name] = parseFloat(item.selling);
     }
   });
 
-  fiyatlariCek();
+  arayuzOlustur();
+}
+
+function arayuzOlustur() {
+  const liste = document.getElementById("liste");
+
+  kullanilanAltinlar.forEach(ad => {
+    const satir = document.createElement("div");
+    satir.className = "satir";
+
+    satir.innerHTML = `
+      <span>${ad}</span>
+      <input type="number" step="0.01" data-ad="${ad}" placeholder="miktar">
+    `;
+
+    liste.appendChild(satir);
+  });
+
+  document.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", hesapla);
+  });
+}
+
+function hesapla() {
+  let toplam = 0;
+
+  document.querySelectorAll("input").forEach(inp => {
+    const ad = inp.dataset.ad;
+    const miktar = parseFloat(inp.value);
+
+    if (!isNaN(miktar) && fiyatlar[ad]) {
+      toplam += miktar * fiyatlar[ad];
+    }
+  });
+
+  document.getElementById("toplam").innerText =
+    "Toplam: " + toplam.toFixed(2) + " TL";
+}
+
+baslat();
 </script>
 
 </body>
