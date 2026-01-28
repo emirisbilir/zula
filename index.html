@@ -97,6 +97,9 @@ body.dark button { background:#333; color:#fff; }
 <script>
 const API_KEY = "apikey 5xpyQEvnvvTLPUM69V7uui:11cUxwSdipU6iVr9Wk8mVy";
 
+/* 🔧 MAKAS KIRPMA ORANI (%50) */
+const MAKAS_KIRPMA_ORANI = 0.5;
+
 const varliklar = [
     { ad:"24 Ayar Gram Altın", api:"Gram Altın" },
     { ad:"22 Ayar Gram Altın", api:"Gram Altın", katsayi:0.916 },
@@ -113,8 +116,11 @@ const varliklar = [
 
 let fiyatlar = {};
 
+/* ✅ KUYUMCU ORTALAMASI */
 function ortalamaFiyat(buy, sell) {
-    return (buy + sell) / 2;
+    if (!buy || !sell) return 0;
+    const makas = sell - buy;
+    return sell - (makas * MAKAS_KIRPMA_ORANI);
 }
 
 async function baslat() {
@@ -185,7 +191,6 @@ function hesapla() {
         const miktar = Number(document.getElementById("m"+i).value);
         if (!miktar) return;
 
-        // BANK
         if (v.manuel) {
             document.getElementById("s"+i).innerText = miktar.toFixed(2)+" TL";
             toplam += miktar;
@@ -197,7 +202,8 @@ function hesapla() {
         const f = fiyatlar[v.api];
         if (!f) return;
 
-        let fiyat = secim === "ortalama"
+        let fiyat =
+            secim === "ortalama"
             ? ortalamaFiyat(f.buying, f.selling)
             : f[secim];
 
