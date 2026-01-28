@@ -123,10 +123,11 @@ const varliklar = [
     { ad:"Yarım Altın", api:"Yarım Altın" },
     { ad:"Tam Altın", api:"Tam Altın" },
     { ad:"Cumhuriyet Altını", api:"Cumhuriyet Altını" },
+    { ad:"Reşat Altın", api:"Reşat Altın" },
     { ad:"Ata Altın", api:"Ata Altın" },
     { ad:"USD", api:"USD" },
     { ad:"EUR", api:"EUR" },
-    { ad:"Bank (Manuel TL)", manuel:true }
+    { ad:"Bank", manuel:true }
 
 ];
 
@@ -145,16 +146,24 @@ async function baslat() {
         fiyatlar[i.name] = Number(i.selling);
     });
 
+    // Reşat Altın fix (API'de yoksa Cumhuriyet'ten türet)
+if (!fiyatlar["Reşat Altın"] && fiyatlar["Cumhuriyet Altını"]) {
+    fiyatlar["Reşat Altın"] = fiyatlar["Cumhuriyet Altını"];
+}
+
     /* DÖVİZ */
     const dovizRes = await fetch(
         "https://api.collectapi.com/economy/allCurrency",
         { headers:{ authorization:"apikey "+API_KEY } }
     );
-    const dovizData = await dovizRes.json();
-
-    dovizData.result.forEach(i=>{
-        fiyatlar[i.name] = Number(i.selling);
-    });
+dovizData.result.forEach(i => {
+    if (i.code === "USD") {
+        fiyatlar["USD"] = Number(i.selling || i.rate);
+    }
+    if (i.code === "EUR") {
+        fiyatlar["EUR"] = Number(i.selling || i.rate);
+    }
+});
 
     tabloKur();
     yukle();
