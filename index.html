@@ -189,7 +189,8 @@ function hesapla() {
     let toplamGram = 0;
 
     let manuelFiyat = Number(document.getElementById("manuel22").value);
-    let fiyat22 = manuelFiyat || (fiyatlar["Gram Altın"] ? ((fiyatlar["Gram Altın"].buying+fiyatlar["Gram Altın"].selling)/2)*KATSAYI_22AYAR : 0);
+    const API_ORTALAMA = fiyatlar["Gram Altın"] ? (fiyatlar["Gram Altın"].buying + fiyatlar["Gram Altın"].selling)/2 : 0;
+    const fiyat22 = manuelFiyat || (API_ORTALAMA * 1.0515); // 1.0515 = senin klasik sistem katsayısı
 
     varliklar.forEach((v,i)=>{
         const miktar = Number(document.getElementById("m"+i).value);
