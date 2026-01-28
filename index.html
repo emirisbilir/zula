@@ -102,12 +102,26 @@ const varliklar = [
 let fiyatlar = {};
 
 async function baslat() {
-    const res = await fetch("https://api.collectapi.com/economy/allCurrency", {
-        headers:{ authorization:"apikey "+API_KEY }
-    });
-    const data = await res.json();
 
-    data.result.forEach(i => {
+    /* ALTIN */
+    const altinRes = await fetch(
+        "https://api.collectapi.com/economy/goldPrice",
+        { headers:{ authorization:"apikey "+API_KEY } }
+    );
+    const altinData = await altinRes.json();
+
+    altinData.result.forEach(i=>{
+        fiyatlar[i.name] = Number(i.selling);
+    });
+
+    /* DÖVİZ */
+    const dovizRes = await fetch(
+        "https://api.collectapi.com/economy/allCurrency",
+        { headers:{ authorization:"apikey "+API_KEY } }
+    );
+    const dovizData = await dovizRes.json();
+
+    dovizData.result.forEach(i=>{
         fiyatlar[i.name] = Number(i.selling);
     });
 
