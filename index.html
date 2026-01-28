@@ -95,8 +95,10 @@ const varliklar = [
     { ad:"Tam Altın", api:"Tam Altın" },
     { ad:"Cumhuriyet Altını", api:"Cumhuriyet Altını" },
     { ad:"Ata Altın", api:"Ata Altın" },
-    { ad:"USD", api:"USD/TRY" },
-    { ad:"EUR", api:"EUR/TRY" }
+    { ad:"USD", api:"USD" },
+    { ad:"EUR", api:"EUR" },
+    { ad:"Bank (Manuel TL)", manuel:true }
+
 ];
 
 let fiyatlar = {};
@@ -144,21 +146,31 @@ function tabloKur() {
 
 function hesapla() {
     let toplam = 0;
-    varliklar.forEach((v,i)=>{
-        const miktar = Number(document.getElementById("m"+i).value);
-        let fiyat = fiyatlar[v.api];
+varliklar.forEach((v,i)=>{
+    const miktar = Number(document.getElementById("m"+i).value);
+    let fiyat = fiyatlar[v.api];
 
-        if(v.katsayi) fiyat *= v.katsayi;
+    // BANK satırı
+    if (v.manuel && miktar) {
+        document.getElementById("s"+i).innerText =
+            miktar.toFixed(2) + " TL";
+        toplam += miktar;
+        localStorage.setItem("m"+i, miktar);
+        return;
+    }
 
-        if(miktar && fiyat){
-            const tutar = miktar * fiyat;
-            document.getElementById("s"+i).innerText = tutar.toFixed(2)+" TL";
-            toplam += tutar;
-            localStorage.setItem("m"+i, miktar);
-        } else {
-            document.getElementById("s"+i).innerText = "—";
-        }
-    });
+    if(v.katsayi) fiyat *= v.katsayi;
+
+    if(miktar && fiyat){
+        const tutar = miktar * fiyat;
+        document.getElementById("s"+i).innerText =
+            tutar.toFixed(2) + " TL";
+        toplam += tutar;
+        localStorage.setItem("m"+i, miktar);
+    } else {
+        document.getElementById("s"+i).innerText = "—";
+    }
+});
     document.getElementById("toplam").innerText =
         "Toplam: " + toplam.toFixed(2) + " TL";
 }
